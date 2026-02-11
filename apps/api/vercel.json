@@ -11,10 +11,5 @@
             "src": "/(.*)",
             "dest": "src/index.ts"
         }
-    ],
-    "env": {
-        "DATABASE_URL": "@database-url",
-        "MASTER_KEY_HEX": "@master-key-hex",
-        "NODE_ENV": "production"
-    }
+    ]
 }
