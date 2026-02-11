@@ -1,15 +1,5 @@
 {
-    "version": 2,
-    "builds": [
-        {
-            "src": "src/index.ts",
-            "use": "@vercel/node"
-        }
-    ],
-    "routes": [
-        {
-            "src": "/(.*)",
-            "dest": "src/index.ts"
-        }
-    ]
+    "buildCommand": "cd ../.. && npx turbo run build --filter=@mirfa/api...",
+    "outputDirectory": "dist",
+    "installCommand": "npm install -g pnpm && cd ../.. && pnpm install"
 }
