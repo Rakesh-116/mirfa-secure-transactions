@@ -20,25 +20,22 @@ const fastify = Fastify({
 // Register CORS with callback for proper origin validation
 fastify.register(cors, {
     origin: (origin, cb) => {
-        const allowed = [
-            "http://localhost:3000",
-            "http://localhost:3001",
-            "https://mirfa-secure-transactions-web.vercel.app",
-            "https://mirfa-secure-transactions-web-git-main.vercel.app",
-        ];
+        if (!origin) return cb(null, true); // server-to-server
 
-        // Allow server-to-server or curl (no origin header)
-        if (!origin) return cb(null, true);
+        // Allow localhost
+        if (origin.startsWith("http://localhost")) {
+            return cb(null, true);
+        }
 
-        if (allowed.includes(origin)) {
+        // Allow all Vercel preview + prod domains
+        if (origin.endsWith(".vercel.app")) {
             return cb(null, true);
         }
 
         cb(new Error("Not allowed by CORS"), false);
     },
     methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type"],
-    credentials: false,
+    allowedHeaders: ["Content-Type", "Authorization"],
 });
 
 // Explicitly handle OPTIONS for all routes (required for Vercel serverless)
