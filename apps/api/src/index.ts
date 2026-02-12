@@ -6,6 +6,7 @@ import path from "path";
 config({ path: path.join(process.cwd(), ".env") });
 
 import Fastify from "fastify";
+import cors from "@fastify/cors";
 import { initSchema } from "@mirfa/db";
 import { encryptHandler, getRecordHandler, decryptHandler } from "./handlers";
 
@@ -15,6 +16,9 @@ const HOST = process.env.HOST || "0.0.0.0";
 const fastify = Fastify({
     logger: true,
 });
+
+// CORS - allow everything (simplest config)
+fastify.register(cors);
 
 // Explicitly handle OPTIONS for all routes (required for Vercel serverless)
 fastify.options("/*", async (request, reply) => {
