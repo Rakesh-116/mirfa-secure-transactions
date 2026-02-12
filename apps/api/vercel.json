@@ -1,5 +1,11 @@
 {
     "buildCommand": "cd ../.. && npx turbo run build --filter=@mirfa/api...",
     "outputDirectory": "dist",
-    "installCommand": "npm install -g pnpm && cd ../.. && pnpm install"
+    "installCommand": "npm install -g pnpm && cd ../.. && pnpm install",
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "/server.js"
+        }
+    ]
 }

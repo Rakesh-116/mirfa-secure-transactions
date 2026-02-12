@@ -17,21 +17,23 @@ const fastify = Fastify({
     logger: true,
 });
 
-// Register CORS with callback for proper origin validation
+// Register CORS with proper origin validation
 fastify.register(cors, {
     origin: (origin, cb) => {
-        if (!origin) return cb(null, true); // server-to-server
+        // Allow requests with no origin (server-to-server, Postman, curl)
+        if (!origin) return cb(null, true);
 
-        // Allow localhost
+        // Allow localhost (any port)
         if (origin.startsWith("http://localhost")) {
             return cb(null, true);
         }
 
-        // Allow all Vercel preview + prod domains
+        // Allow all Vercel preview + production domains
         if (origin.endsWith(".vercel.app")) {
             return cb(null, true);
         }
 
+        // Reject all other origins
         cb(new Error("Not allowed by CORS"), false);
     },
     methods: ["GET", "POST", "OPTIONS"],
@@ -63,12 +65,12 @@ fastify.post("/tx/:id/decrypt", decryptHandler);
  */
 async function start() {
     try {
-        // Initialize database schema
-        await initSchema();
-        fastify.log.info("Database schema initialized");
-
-        // Start server (only if not running on Vercel)
+        // ❌ DO NOT run initSchema on Vercel - causes serverless crash
+        // Only initialize schema in local development
         if (!process.env.VERCEL) {
+            await initSchema();
+            fastify.log.info("Database schema initialized");
+
             await fastify.listen({ port: PORT, host: HOST });
             fastify.log.info(`Server listening on ${HOST}:${PORT}`);
         }
@@ -83,5 +85,8 @@ if (!process.env.VERCEL) {
     start();
 }
 
-// Export for Vercel serverless
-export default fastify;
+// Export for Vercel serverless - proper handler wrapper
+export default async function handler(req: any, res: any) {
+    await fastify.ready();
+    fastify.server.emit("request", req, res);
+}
