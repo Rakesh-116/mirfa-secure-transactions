@@ -1,9 +1,8 @@
-import { config } from "dotenv";
-import path from "path";
-
-// Load environment variables FIRST before any other imports
-// In a monorepo, load from root .env file
-config({ path: path.join(process.cwd(), ".env") });
+// Load dotenv only in local development (Vercel injects env vars automatically)
+if (!process.env.VERCEL) {
+    const dotenv = require("dotenv");
+    dotenv.config();
+}
 
 import Fastify from "fastify";
 import cors from "@fastify/cors";
@@ -65,8 +64,15 @@ if (!process.env.VERCEL) {
     start();
 }
 
-// Export for Vercel serverless - proper handler wrapper
+// Export for Vercel serverless - proper handler wrapper with error handling
 export default async function handler(req: any, res: any) {
-    await fastify.ready();
-    fastify.server.emit("request", req, res);
+    try {
+        await fastify.ready();
+        fastify.server.emit("request", req, res);
+    } catch (err) {
+        console.error("Serverless handler error:", err);
+        res.statusCode = 500;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ error: "Internal server error" }));
+    }
 }
