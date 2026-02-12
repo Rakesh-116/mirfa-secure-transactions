@@ -6,7 +6,6 @@ import path from "path";
 config({ path: path.join(process.cwd(), ".env") });
 
 import Fastify from "fastify";
-import cors from "@fastify/cors";
 import { initSchema } from "@mirfa/db";
 import { encryptHandler, getRecordHandler, decryptHandler } from "./handlers";
 
@@ -15,29 +14,6 @@ const HOST = process.env.HOST || "0.0.0.0";
 
 const fastify = Fastify({
     logger: true,
-});
-
-// Register CORS with proper origin validation
-fastify.register(cors, {
-    origin: (origin, cb) => {
-        // Allow requests with no origin (server-to-server, Postman, curl)
-        if (!origin) return cb(null, true);
-
-        // Allow localhost (any port)
-        if (origin.startsWith("http://localhost")) {
-            return cb(null, true);
-        }
-
-        // Allow all Vercel preview + production domains
-        if (origin.endsWith(".vercel.app")) {
-            return cb(null, true);
-        }
-
-        // Reject all other origins
-        cb(new Error("Not allowed by CORS"), false);
-    },
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
 });
 
 // Explicitly handle OPTIONS for all routes (required for Vercel serverless)
